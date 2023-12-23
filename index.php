@@ -37,7 +37,10 @@
             </form>
             <div>
                 <?php
-
+                    $tsk = $c->query("SELECT * from todo");
+                    while($res = $tsk->fetch(PDO::FETCH_ASSOC)){
+                        echo "<div><span>".$res['title']."</span><input type='submit' name='done' value='Done' /> <input type='submit' name='delt' value='X' /></div>";
+                    }
                 ?>
             </div>
         </div>
