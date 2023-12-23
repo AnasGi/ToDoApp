@@ -1,23 +1,13 @@
 <?php 
-    $server='localhost';
-    $username='root';
-    $password='AnSql12345';
-    $dataBase='todolist';
-
-    try{
-        $c = new PDO("mysql:host=$server; dbname=$dataBase", $username, $password);
-        $c->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    }
-    catch (PDOException $e){
-        echo "erreur lors de la connexion a la base de données: ".$e->getMessage();
-    }
+    require('cnx.php');
 
     if(isset($_POST["add"])){
-        $tache = $c->prepare("INSERT into todo(title , isdone , created_at) values(:p1 , :p2 , :p3)");
-        $tache->bindValue(":p1" , $_POST["task"]);
-        $tache->bindValue(":p2" , $_POST["done"]);
-        $tache->bindValue(":p3" , strtotime("now"));
+        $tache = $c->prepare("INSERT into todo(title) values(:p1)");
+        $tache->bindValue(":p1" , @$_POST["title"]);
+        $tache->execute(); 
     }
+
+    
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -32,14 +22,15 @@
         <div><h1>Todo List</h1></div>
         <div>
             <form method="post">
-                <input type="text" name="task" placeholder="Task Title"/>
+                <input type="text" name="title" placeholder="Task Title"/>
                 <input type="submit" name="add" value="Add" />
             </form>
             <div>
                 <?php
-                    $tsk = $c->query("SELECT * from todo");
+                    $tsk = $c->query("SELECT * from todo order by created_at desc");
                     while($res = $tsk->fetch(PDO::FETCH_ASSOC)){
-                        echo "<div><span>".$res['title']."</span><input type='submit' name='done' value='Done' /> <input type='submit' name='delt' value='X' /></div>";
+                        $id = $res['id'];
+                        echo $res['done'] == "0"? "<div><span>".$res['title']."</span> <a href='done.php?id=$id'><input type='submit' name='Done' value='Done' /></a> <a href='delete.php?id=$id'><input type='submit' name='delt' value='X' /></a></div>" : "<div><span>".$res['title']."</span><a href='delete.php?id=$id'><input type='submit' name='delt' value='X' /></a></div>";
                     }
                 ?>
             </div>
